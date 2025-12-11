@@ -1,0 +1,30 @@
+.custom-cursor {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: background-color 0.3s;
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.5);
+}
+
+.cursor-text {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  color: #facc15;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
+}
+
+@media (max-width: 768px) {
+  .custom-cursor {
+    display: none;
+  }
+  
+  .cursor-text {
+    display: none;
+  }
+}
+

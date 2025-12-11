@@ -1,0 +1,66 @@
+.open-library {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.library-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.library-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+  color: white;
+}
+
+.library-hero svg {
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.library-hero h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.library-hero p {
+  font-size: 1.25rem;
+  opacity: 0.9;
+}
+
+.library-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.books-count {
+  margin-bottom: 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  font-size: 1.125rem;
+}
+
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.loading, .empty-state {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.25rem;
+  color: white;
+  opacity: 0.9;
+}
+

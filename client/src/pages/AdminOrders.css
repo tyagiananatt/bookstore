@@ -1,0 +1,106 @@
+.admin-orders {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.dark .admin-orders {
+  background: #0f172a;
+}
+
+.admin-orders-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.admin-orders-container h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #1e293b;
+}
+
+.dark .admin-orders-container h1 {
+  color: white;
+}
+
+.orders-table {
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dark .orders-table {
+  background: #1e293b;
+}
+
+.orders-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-table thead {
+  background: #f1f5f9;
+}
+
+.dark .orders-table thead {
+  background: #334155;
+}
+
+.orders-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.dark .orders-table th {
+  color: white;
+}
+
+.orders-table td {
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.dark .orders-table td {
+  border-top-color: #334155;
+  color: #94a3b8;
+}
+
+.status-select {
+  padding: 0.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: white;
+  cursor: pointer;
+}
+
+.dark .status-select {
+  background: #334155;
+  border-color: #475569;
+  color: white;
+}
+
+.orders-table button {
+  padding: 0.5rem 1rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.loading {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.25rem;
+  color: #64748b;
+}
+
+.dark .loading {
+  color: #94a3b8;
+}
+
