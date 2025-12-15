@@ -16,9 +16,9 @@ router.get('/', async (req, res) => {
       query.genre = genre;
     }
 
-    // Free books filter
-    if (isFree === 'true') {
-      query.isFree = true;
+    // Free books filter (support both true and false)
+    if (typeof isFree !== 'undefined') {
+      query.isFree = isFree === 'true';
     }
 
     // Search filter

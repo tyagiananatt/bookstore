@@ -82,14 +82,16 @@ const BookCard = ({ book, onDelete, onEdit, showActions = true }) => {
           
           {showActions && (
             <div className="preface-actions">
-              <button
-                className="action-btn view-btn"
-                onClick={handleView}
-                title="View Details"
-              >
-                <FiEye />
-                <span>View</span>
-              </button>
+              {!book.isFree && (
+                <button
+                  className="action-btn view-btn"
+                  onClick={handleView}
+                  title="View Details"
+                >
+                  <FiEye />
+                  <span>View</span>
+                </button>
+              )}
               {!book.isFree && (
                 <button
                   className="action-btn cart-btn"

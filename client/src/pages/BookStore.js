@@ -41,12 +41,14 @@ const BookStore = () => {
       const params = {
         genre: selectedGenre,
         search: searchQuery,
+        isFree: 'false',
         sort: sortBy,
         page: currentPage,
         limit: 12,
       };
       const data = await bookService.getBooks(params);
-      setBooks(data.books);
+      // Ensure only paid books appear even if server filtering changes
+      setBooks((data.books || []).filter((b) => !b.isFree));
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error('Error fetching books:', error);
