@@ -41,10 +41,6 @@ This will start:
 - Backend server on http://localhost:5000
 - Frontend on http://localhost:3000
 
-## 🔐 Default Admin Credentials
-
-- **Username:** admin
-- **Password:** admin123
 
 ## 📁 Project Structure
 
