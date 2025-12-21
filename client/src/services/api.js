@@ -138,5 +138,25 @@ export const orderService = {
   },
 };
 
+
+export const bookRequestService = {
+  createRequest: async (requestData) => {
+    const response = await api.post('/book-requests', requestData);
+    return response.data;
+  },
+  getMyRequests: async () => {
+    const response = await api.get('/book-requests/my-requests');
+    return response.data;
+  },
+  getAllRequests: async () => {
+    const response = await api.get('/book-requests');
+    return response.data;
+  },
+  updateRequestStatus: async (id, status) => {
+    const response = await api.put(`/book-requests/${id}`, { status });
+    return response.data;
+  },
+};
+
 export default api;
 

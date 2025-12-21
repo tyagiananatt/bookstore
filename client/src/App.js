@@ -13,9 +13,11 @@ import OpenLibrary from './pages/OpenLibrary';
 import PDFViewer from './pages/PDFViewer';
 import Cart from './pages/Cart';
 import Orders from './pages/Orders';
+import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminBooks from './pages/AdminBooks';
 import AdminOrders from './pages/AdminOrders';
+import AdminRequests from './pages/AdminRequests';
 import BookForm from './components/BookForm';
 import PremiumLanding from './pages/PremiumLanding';
 import './App.css';
@@ -79,6 +81,14 @@ function App() {
                   }
                 />
                 <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/admin"
                   element={
                     <ProtectedRoute adminOnly>
@@ -99,6 +109,14 @@ function App() {
                   element={
                     <ProtectedRoute adminOnly>
                       <AdminOrders />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/requests"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <AdminRequests />
                     </ProtectedRoute>
                   }
                 />

@@ -1,6 +1,6 @@
 .user-dashboard {
   min-height: 100vh;
-  background: 
+  background:
     radial-gradient(circle at 20% 50%, rgba(255, 193, 7, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, rgba(255, 152, 0, 0.1) 0%, transparent 50%),
     linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
@@ -12,7 +12,7 @@
 }
 
 .dark .user-dashboard {
-  background: 
+  background:
     radial-gradient(circle at 20% 50%, rgba(255, 193, 7, 0.15) 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, rgba(255, 152, 0, 0.15) 0%, transparent 50%),
     linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
@@ -26,7 +26,7 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: 
+  background:
     radial-gradient(circle, rgba(255, 193, 7, 0.05) 1px, transparent 1px);
   background-size: 50px 50px;
   animation: backgroundMove 20s linear infinite;
@@ -37,6 +37,7 @@
   0% {
     transform: translate(0, 0);
   }
+
   100% {
     transform: translate(50px, 50px);
   }
@@ -74,9 +75,12 @@
 }
 
 @keyframes gradientShift {
-  0%, 100% {
+
+  0%,
+  100% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
@@ -102,7 +106,7 @@
 .hero-image img {
   width: 100%;
   border-radius: 32px;
-  box-shadow: 
+  box-shadow:
     0 30px 80px rgba(255, 193, 7, 0.3),
     0 0 0 1px rgba(255, 193, 7, 0.2) inset;
   transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
@@ -111,7 +115,7 @@
 
 .hero-image:hover img {
   transform: perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1.05);
-  box-shadow: 
+  box-shadow:
     0 30px 80px rgba(255, 193, 7, 0.5),
     0 0 0 1px rgba(255, 193, 7, 0.3) inset;
 }
@@ -137,7 +141,7 @@
   gap: 1.5rem;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 193, 7, 0.3) inset;
   border: 1px solid rgba(255, 193, 7, 0.2);
@@ -152,12 +156,10 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 193, 7, 0.2),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 193, 7, 0.2),
+      transparent);
   transition: left 0.5s;
 }
 
@@ -168,14 +170,14 @@
 .dark .stat-card {
   background: rgba(0, 0, 0, 0.8);
   border-color: rgba(255, 193, 7, 0.3);
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(255, 193, 7, 0.2) inset;
 }
 
 .stat-card:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 20px 60px rgba(255, 193, 7, 0.4),
     0 0 0 1px rgba(255, 193, 7, 0.5) inset,
     0 0 40px rgba(255, 193, 7, 0.3);
@@ -183,7 +185,7 @@
 }
 
 .dark .stat-card:hover {
-  box-shadow: 
+  box-shadow:
     0 20px 60px rgba(255, 193, 7, 0.5),
     0 0 0 1px rgba(255, 193, 7, 0.4) inset,
     0 0 40px rgba(255, 193, 7, 0.4);
@@ -314,7 +316,7 @@
   transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
- 
+
 }
 
 .books-slider::after {
@@ -352,7 +354,7 @@
 .slider-item {
   flex: 0 0 300px;
   min-width: 300px;
-  
+
   will-change: transform;
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -418,6 +420,8 @@
     will-change: transform;
   }
 }
-html, body {
+
+html,
+body {
   overflow-x: hidden;
 }

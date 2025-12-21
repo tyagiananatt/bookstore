@@ -217,6 +217,7 @@
   background: rgba(255, 193, 7, 0.1);
   border-radius: 16px;
   border: 1px solid rgba(255, 193, 7, 0.3);
+  position: relative;
 }
 
 .dark .user-menu {
@@ -260,6 +261,131 @@
 
 .dark .logout-btn:hover {
   background: rgba(239, 68, 68, 0.2);
+}
+
+/* Username arrow toggle */
+.user-toggle {
+  background: transparent;
+  border: none;
+  color: #FFC107;
+  font-size: 1.1rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.dark .user-toggle {
+  color: #FFD700;
+}
+
+.user-toggle:hover {
+  background: rgba(255, 193, 7, 0.12);
+  color: #FFD700;
+}
+
+/* Dropdown Popover */
+.user-popover {
+  position: absolute;
+  right: 0;
+  top: 110%;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  z-index: 1100;
+}
+
+.dark .user-popover {
+  background: rgba(0,0,0,0.95);
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+.popover-item {
+  background: transparent;
+  border: none;
+  color: #FFC107;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.popover-item:hover {
+  background: rgba(255, 193, 7, 0.15);
+  transform: translateX(2px);
+}
+
+.dark .popover-item:hover {
+  background: rgba(255, 193, 7, 0.25);
+}
+
+/* Popover Menu */
+/* Slider Menu */
+.user-slider {
+  position: absolute;
+  right: 0;
+  top: 110%;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  padding: 0.4rem;
+  z-index: 1100;
+}
+
+.dark .user-slider {
+  background: rgba(0,0,0,0.95);
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+.slider-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+  background: rgba(255, 193, 7, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.slider-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 50%;
+  background: rgba(255, 193, 7, 0.25);
+  border-right: 1px solid rgba(255, 193, 7, 0.35);
+  transition: left 0.25s ease;
+  pointer-events: none;
+}
+
+.slider-option {
+  background: transparent;
+  border: none;
+  color: #FFC107;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.slider-option:hover {
+  color: #FFD700;
 }
 
 @media (max-width: 768px) {

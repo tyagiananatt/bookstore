@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
-import { bookService, orderService } from '../services/api';
-import { FiBook, FiShoppingBag, FiUsers, FiDollarSign } from 'react-icons/fi';
+import { bookService, orderService, bookRequestService } from '../services/api';
+import { FiBook, FiShoppingBag, FiUsers, FiDollarSign, FiInbox } from 'react-icons/fi';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -11,6 +11,7 @@ const AdminDashboard = () => {
     totalBooks: 0,
     totalOrders: 0,
     totalRevenue: 0,
+    pendingRequests: 0,
   });
 
   useEffect(() => {
@@ -19,14 +20,16 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [booksData, ordersData] = await Promise.all([
+      const [booksData, ordersData, requestsData] = await Promise.all([
         bookService.getBooks({ limit: 1 }),
         orderService.getAllOrders(),
+        bookRequestService.getAllRequests(),
       ]);
       setStats({
         totalBooks: booksData.total,
         totalOrders: ordersData.length,
         totalRevenue: ordersData.reduce((sum, order) => sum + order.totalAmount, 0),
+        pendingRequests: requestsData.filter(r => r.status === 'pending').length
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -60,6 +63,13 @@ const AdminDashboard = () => {
               <p>Total Revenue</p>
             </div>
           </div>
+          <div className="stat-card" onClick={() => navigate('/admin/requests')}>
+            <FiInbox className="stat-icon" />
+            <div>
+              <h3>{stats.pendingRequests}</h3>
+              <p>Pending Requests</p>
+            </div>
+          </div>
         </div>
         <div className="admin-actions">
           <button onClick={() => navigate('/admin/books')} className="action-btn">
@@ -67,6 +77,9 @@ const AdminDashboard = () => {
           </button>
           <button onClick={() => navigate('/admin/orders')} className="action-btn">
             Manage Orders
+          </button>
+          <button onClick={() => navigate('/admin/requests')} className="action-btn">
+            Manage Requests
           </button>
         </div>
       </div>

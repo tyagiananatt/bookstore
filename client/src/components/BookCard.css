@@ -1,8 +1,8 @@
 :root {
-  --mobile-width: 325px;
-  --mobile-height: 670px;
-  --mobile-radius: 25px;
-  --separator-height: 500px;
+  --mobile-width: 260px;
+  --mobile-height: 560px;
+  --mobile-radius: 22px;
+  --separator-height: 420px;
   --bg: #000000;
   --mobile-bg: #1a1a1a;
   --intro-bg: #2a2a2a;
@@ -13,13 +13,13 @@
 .book-card-mobile {
   width: var(--mobile-width);
   height: var(--mobile-height);
-  margin: 20px;
+  margin: 14px;
   border-radius: var(--mobile-radius);
   perspective: 500px;
   overflow: hidden;
   color: var(--font-color);
   background-color: var(--mobile-bg);
-  box-shadow: 36px 36px 50px 15px rgba(255, 193, 7, 0.2);
+  box-shadow: 24px 24px 36px 12px rgba(255, 193, 7, 0.2);
   position: relative;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -36,10 +36,10 @@
   left: 0;
   right: 0;
   width: 100%;
-  padding: 20px;
+  padding: 14px;
   display: flex;
   justify-content: space-between;
-  font-size: 20px;
+  font-size: 18px;
   z-index: 6;
   pointer-events: none;
 }
@@ -81,25 +81,25 @@
 }
 
 .book-top {
-  width: 170px;
+  width: 180px;
   position: absolute;
-  top: 180px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%) translateZ(28.5px);
+  transform: translate(-50%, -50%) translateZ(24px);
   z-index: 5;
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
   object-fit: cover;
-  height: 240px;
+  height: 260px;
 }
 
 .book-top-placeholder {
-  width: 170px;
-  height: 240px;
+  width: 180px;
+  height: 260px;
   position: absolute;
-  top: 180px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%) translateZ(28.5px);
+  transform: translate(-50%, -50%) translateZ(24px);
   z-index: 5;
   display: flex;
   align-items: center;
@@ -107,15 +107,15 @@
   background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
   border-radius: 8px;
   color: #000000;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
 }
 
 .book-side {
   position: absolute;
-  top: 430px;
+  top: calc(50% + 130px);
   left: 50%;
   transform: translateX(-50%) translateY(-15px) translateZ(15px) rotateX(104deg);
-  width: 170px;
+  width: 180px;
   height: 20px;
   background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
   border-radius: 0 0 4px 4px;
@@ -164,7 +164,7 @@
 
 .preface {
   height: var(--separator-height);
-  padding: 50px;
+  padding: 36px;
   transition: var(--transition);
   background: rgba(0, 0, 0, 0.95);
   border-bottom-left-radius: var(--mobile-radius);
@@ -174,7 +174,7 @@
 }
 
 .preface.open {
-  transform: translateY(-302px);
+  transform: translateY(-260px);
 }
 
 .preface-content {
@@ -192,7 +192,7 @@
 
 .preface-title {
   font-family: 'Quicksand', 'Inter', sans-serif;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   color: #FFD700;
   line-height: 1.2;
@@ -203,7 +203,7 @@
   transform-origin: top;
   transition: var(--transition);
   color: #FFD700;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
 }
 
@@ -214,9 +214,9 @@
 .preface-author {
   font-family: 'Inter', sans-serif;
   font-style: italic;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   color: #FFC107;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .preface-body {
@@ -224,7 +224,7 @@
   flex: 1;
   color: #FFC107;
   line-height: 1.6;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .preface-body p {
@@ -272,15 +272,15 @@
 
 .preface-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 8px;
+  margin-top: 16px;
   flex-wrap: wrap;
 }
 
 .preface-actions .action-btn {
-  min-width: 80px;
-  height: 44px;
-  padding: 0 16px;
+  min-width: 72px;
+  height: 40px;
+  padding: 0 12px;
   border-radius: 12px;
   border: none;
   display: flex;
@@ -288,7 +288,7 @@
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);

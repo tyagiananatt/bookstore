@@ -66,8 +66,8 @@ const BookStore = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1>Book Store</h1>
-          <p>Discover and purchase your favorite books</p>
+          <h1>PageX</h1>
+          <p>Discover and purchase your favorite reads</p>
         </motion.div>
 
         <div className="store-filters">

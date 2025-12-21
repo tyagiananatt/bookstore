@@ -157,7 +157,7 @@ const PremiumLanding = () => {
             whileHover={{ scale: 1.1 }}
             data-cursor-text="Home"
           >
-            BookStore
+            PageX
           </motion.div>
           <div className="nav-links">
             <a href="#features" data-cursor-text="Features">Features</a>
@@ -406,7 +406,7 @@ const PremiumLanding = () => {
       <footer className="premium-footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h3>BookStore</h3>
+            <h3>PageX</h3>
             <p>Your gateway to endless stories</p>
           </div>
           <div className="footer-section">
@@ -436,7 +436,7 @@ const PremiumLanding = () => {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2024 BookStore. All rights reserved.</p>
+          <p>&copy; 2024 PageX. All rights reserved.</p>
         </div>
       </footer>
     </div>

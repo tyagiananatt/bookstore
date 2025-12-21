@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { motion } from 'framer-motion';
 import { FiX, FiChevronLeft, FiChevronRight, FiZoomIn, FiZoomOut, FiMoon, FiSun, FiFileText, FiBook, FiCornerDownLeft } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import api, { bookService } from '../services/api';
 import Header from '../components/Header';
 import './PDFViewer.css';
@@ -15,10 +16,14 @@ const PDFViewer = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useTheme();
+  const { user } = useAuth();
   const [book, setBook] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1.5);
+  const contentRef = useRef(null);
+  const [zoom, setZoom] = useState(1);
+  const [pageWidth, setPageWidth] = useState(null);
+  const baseWidthRef = useRef(0);
   const [loading, setLoading] = useState(true);
   const [pdfError, setPdfError] = useState(false);
   const [pdfDoc, setPdfDoc] = useState(null);
@@ -27,6 +32,8 @@ const PDFViewer = () => {
   const [summaryScope, setSummaryScope] = useState(null); // 'page' | 'book'
   const [savedPage, setSavedPage] = useState(null);
   const [pageInput, setPageInput] = useState(1);
+  const sessionStartRef = useRef(Date.now());
+  const pagesVisitedRef = useRef(new Set());
 
   useEffect(() => {
     fetchBook();
@@ -61,7 +68,9 @@ const PDFViewer = () => {
       if (parsed && parsed >= 1 && parsed <= doc.numPages) {
         setSavedPage(parsed);
       }
-    } catch {}
+      // Initialize visited pages set from last saved page
+      pagesVisitedRef.current.add(parsed || 1);
+    } catch { }
   };
 
   const onDocumentLoadError = (error) => {
@@ -78,12 +87,34 @@ const PDFViewer = () => {
     setPageNumber(prev => Math.min(numPages, prev + 1));
   };
 
+  const recomputeBaseWidth = () => {
+    try {
+      const el = contentRef.current;
+      if (!el) return;
+      const containerWidth = el.clientWidth || window.innerWidth;
+      baseWidthRef.current = Math.min(Math.max(300, containerWidth - 32), 900);
+      setPageWidth(Math.round(baseWidthRef.current * zoom));
+    } catch {}
+  };
+
+  useEffect(() => {
+    recomputeBaseWidth();
+    const onResize = () => recomputeBaseWidth();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setPageWidth(Math.round((baseWidthRef.current || 600) * zoom));
+  }, [zoom]);
+
   const zoomIn = () => {
-    setScale(prev => Math.min(3, prev + 0.25));
+    setZoom(prev => Math.min(2, prev + 0.1));
   };
 
   const zoomOut = () => {
-    setScale(prev => Math.max(0.5, prev - 0.25));
+    setZoom(prev => Math.max(0.6, prev - 0.1));
   };
 
   // Persist reading progress whenever page changes
@@ -92,7 +123,17 @@ const PDFViewer = () => {
     try {
       localStorage.setItem(`readingProgress:${id}`, String(pageNumber));
       setPageInput(pageNumber);
-    } catch {}
+      pagesVisitedRef.current.add(pageNumber);
+      // Persist per-user detailed progress
+      const uid = user?.username || 'guest';
+      const storeKey = `readingProgressByUser:${uid}`;
+      const raw = localStorage.getItem(storeKey);
+      const map = raw ? JSON.parse(raw) : {};
+      const prev = map[id] || { bookId: id, title: book?.title, author: book?.author, pdfUrl: book?.pdfUrl, numPages: numPages || 1, lastPage: 1, pagesReadCount: 0, timeMsTotal: 0 };
+      const pagesReadCount = pagesVisitedRef.current.size;
+      map[id] = { ...prev, lastPage: pageNumber, numPages: numPages || prev.numPages || 1, pagesReadCount };
+      localStorage.setItem(storeKey, JSON.stringify(map));
+    } catch { }
   }, [pageNumber, id, numPages]);
 
   const jumpToSavedPage = () => {
@@ -108,9 +149,26 @@ const PDFViewer = () => {
     }
   };
 
+  // On unmount, update time spent
+  useEffect(() => {
+    return () => {
+      try {
+        const uid = user?.username || 'guest';
+        const storeKey = `readingProgressByUser:${uid}`;
+        const raw = localStorage.getItem(storeKey);
+        const map = raw ? JSON.parse(raw) : {};
+        const elapsed = Date.now() - (sessionStartRef.current || Date.now());
+        const prev = map[id] || { bookId: id, title: book?.title, author: book?.author, pdfUrl: book?.pdfUrl, numPages: numPages || 1, lastPage: pageNumber, pagesReadCount: pagesVisitedRef.current.size || 1, timeMsTotal: 0 };
+        map[id] = { ...prev, timeMsTotal: (prev.timeMsTotal || 0) + Math.max(0, elapsed) };
+        localStorage.setItem(storeKey, JSON.stringify(map));
+      } catch { }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // --- Simple extractive summarizer (client-side, free) ---
   const STOP_WORDS = new Set([
-    'the','and','a','an','of','to','in','on','for','with','at','by','from','up','about','into','over','after','is','are','was','were','be','been','being','it','that','as','this','but','or','if','because','while','so','than','too','very','can','cannot','could','should','would','may','might','do','does','did','doing','have','has','had','having','i','you','he','she','they','them','we','us','our','your','his','her','their'
+    'the', 'and', 'a', 'an', 'of', 'to', 'in', 'on', 'for', 'with', 'at', 'by', 'from', 'up', 'about', 'into', 'over', 'after', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'it', 'that', 'as', 'this', 'but', 'or', 'if', 'because', 'while', 'so', 'than', 'too', 'very', 'can', 'cannot', 'could', 'should', 'would', 'may', 'might', 'do', 'does', 'did', 'doing', 'have', 'has', 'had', 'having', 'i', 'you', 'he', 'she', 'they', 'them', 'we', 'us', 'our', 'your', 'his', 'her', 'their'
   ]);
 
   const splitSentences = (text) => {
@@ -148,16 +206,16 @@ const PDFViewer = () => {
     const words = text.match(/\b[A-Z][a-z]+\b/g) || [];
     for (const w of words) {
       // skip common capitalized words
-      if (['I','The','A','He','She','They','We','You'].includes(w)) continue;
+      if (['I', 'The', 'A', 'He', 'She', 'They', 'We', 'You'].includes(w)) continue;
       counts.set(w, (counts.get(w) || 0) + 1);
     }
-    return Array.from(counts.entries()).sort((a,b)=>b[1]-a[1]).slice(0,limit).map(([w])=>w);
+    return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).slice(0, limit).map(([w]) => w);
   };
 
   const hasAny = (text, list) => list.some(k => new RegExp(`\\b${k}\\b`, 'i').test(text));
 
   const structuredSummaryFromText = (text, opts = { scope: 'book' }) => {
-    const clean = (text || '').replace(/\s+/g,' ').trim();
+    const clean = (text || '').replace(/\s+/g, ' ').trim();
     if (!clean) return 'No extractable text found.';
 
     const nouns = topProperNouns(clean, 6);
@@ -165,34 +223,34 @@ const PDFViewer = () => {
 
     // Goals & conflicts
     const goalMap = [
-      { k: ['enlighten','enlightenment','wisdom','meaning','purpose'], v: 'enlightenment and the meaning of life' },
-      { k: ['love','beloved','romance'], v: 'love and connection' },
-      { k: ['revenge','vengeance'], v: 'revenge against a rival' },
-      { k: ['freedom','escape','liberty'], v: 'freedom from oppression' },
-      { k: ['survival','danger','war'], v: 'survival through hardship' }
+      { k: ['enlighten', 'enlightenment', 'wisdom', 'meaning', 'purpose'], v: 'enlightenment and the meaning of life' },
+      { k: ['love', 'beloved', 'romance'], v: 'love and connection' },
+      { k: ['revenge', 'vengeance'], v: 'revenge against a rival' },
+      { k: ['freedom', 'escape', 'liberty'], v: 'freedom from oppression' },
+      { k: ['survival', 'danger', 'war'], v: 'survival through hardship' }
     ];
     let goal = 'a personal quest';
     for (const g of goalMap) { if (hasAny(clean, g.k)) { goal = g.v; break; } }
 
     // Stages
     const stages = [];
-    if (hasAny(clean, ['leave','left','depart','home','father','family'])) stages.push('leaving home');
-    if (hasAny(clean, ['Samana','ascetic','Buddha','Gotama','monk'])) stages.push('ascetic life and meeting spiritual teachers');
-    if (hasAny(clean, ['Kamala','wealth','merchant','Kamaswami','pleasure','city'])) stages.push('worldly life of desire and wealth');
-    if (hasAny(clean, ['river','ferryman','Vasudeva'])) stages.push('life by the river and learning from nature');
-    if (hasAny(clean, ['Om','unity','oneness','awaken','enlighten','peace'])) stages.push('realization and inner awakening');
+    if (hasAny(clean, ['leave', 'left', 'depart', 'home', 'father', 'family'])) stages.push('leaving home');
+    if (hasAny(clean, ['Samana', 'ascetic', 'Buddha', 'Gotama', 'monk'])) stages.push('ascetic life and meeting spiritual teachers');
+    if (hasAny(clean, ['Kamala', 'wealth', 'merchant', 'Kamaswami', 'pleasure', 'city'])) stages.push('worldly life of desire and wealth');
+    if (hasAny(clean, ['river', 'ferryman', 'Vasudeva'])) stages.push('life by the river and learning from nature');
+    if (hasAny(clean, ['Om', 'unity', 'oneness', 'awaken', 'enlighten', 'peace'])) stages.push('realization and inner awakening');
 
     // Themes
     const themeList = [];
-    if (hasAny(clean, ['self','self-realization','self discovery'])) themeList.push('self-realization');
-    if (hasAny(clean, ['teacher','teaching','doctrine','preach','lesson','experience'])) themeList.push('experience over teaching');
-    if (hasAny(clean, ['Samsara','cycle','impermanence','change'])) themeList.push('impermanence (Samsara)');
-    if (hasAny(clean, ['unity','oneness','river','all'])) themeList.push('unity of life');
+    if (hasAny(clean, ['self', 'self-realization', 'self discovery'])) themeList.push('self-realization');
+    if (hasAny(clean, ['teacher', 'teaching', 'doctrine', 'preach', 'lesson', 'experience'])) themeList.push('experience over teaching');
+    if (hasAny(clean, ['Samsara', 'cycle', 'impermanence', 'change'])) themeList.push('impermanence (Samsara)');
+    if (hasAny(clean, ['unity', 'oneness', 'river', 'all'])) themeList.push('unity of life');
     if (themeList.length === 0) themeList.push('personal growth');
 
     // Outcome
     let outcome = 'finds a measure of inner peace and wisdom';
-    if (hasAny(clean, ['peace','wisdom','smile','serenity','enlighten'])) outcome = 'finds inner peace and wisdom';
+    if (hasAny(clean, ['peace', 'wisdom', 'smile', 'serenity', 'enlighten'])) outcome = 'finds inner peace and wisdom';
 
     // Compose concise summary without quotes
     const sentences = [];
@@ -356,11 +414,11 @@ const PDFViewer = () => {
             </div>
           </div>
           <div className="toolbar-right">
-            <button className="toolbar-btn" onClick={zoomOut} disabled={scale <= 0.5}>
+            <button className="toolbar-btn" onClick={zoomOut} disabled={zoom <= 0.6}>
               <FiZoomOut />
             </button>
-            <span className="zoom-info">{Math.round(scale * 100)}%</span>
-            <button className="toolbar-btn" onClick={zoomIn} disabled={scale >= 3}>
+            <span className="zoom-info">{Math.round(zoom * 100)}%</span>
+            <button className="toolbar-btn" onClick={zoomIn} disabled={zoom >= 2}>
               <FiZoomIn />
             </button>
             <button className="toolbar-btn" onClick={toggleDarkMode}>
@@ -375,7 +433,7 @@ const PDFViewer = () => {
           </div>
         </div>
 
-        <div className="pdf-content">
+        <div className="pdf-content" ref={contentRef}>
           <Document
             file={book.pdfUrl}
             onLoadSuccess={onDocumentLoadSuccess}
@@ -389,7 +447,7 @@ const PDFViewer = () => {
           >
             <Page
               pageNumber={pageNumber}
-              scale={scale}
+              width={pageWidth || undefined}
               renderTextLayer={false}
               renderAnnotationLayer={false}
             />
