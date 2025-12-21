@@ -107,52 +107,51 @@ const AdminBooks = () => {
               Showing {books.length} of {allBooks.length} books
             </div>
             <div className="books-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Cover</th>
-                  <th>Title</th>
-                  <th>Author</th>
-                  <th>Genre</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Free</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {books.map((book) => (
-                  <tr key={book._id}>
-                    <td>
-                      <img
-                        src={book.coverImage || 'https://via.placeholder.com/50'}
-                        alt={book.title}
-                        className="book-thumb"
-                      />
-                    </td>
-                    <td>{book.title}</td>
-                    <td>{book.author}</td>
-                    <td>{book.genre}</td>
-                    <td>${book.price.toFixed(2)}</td>
-                    <td>{book.stock}</td>
-                    <td>{book.isFree ? 'Yes' : 'No'}</td>
-                    <td>
-                      <div className="action-buttons">
-                        <button onClick={() => navigate(`/admin/books/edit/${book._id}`)}>
-                          <FiEdit />
-                        </button>
-                        <button onClick={() => handleDelete(book._id)} className="delete-btn">
-                          <FiTrash2 />
-                        </button>
-                      </div>
-                    </td>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cover</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Genre</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Free</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          )}
-        </>
+                </thead>
+                <tbody>
+                  {books.map((book) => (
+                    <tr key={book._id}>
+                      <td>
+                        <img
+                          src={book.coverImage || 'https://via.placeholder.com/50'}
+                          alt={book.title}
+                          className="book-thumb"
+                        />
+                      </td>
+                      <td>{book.title}</td>
+                      <td>{book.author}</td>
+                      <td>{book.genre}</td>
+                      <td>{book.isFree ? 'Free' : (book.price != null ? `$${book.price.toFixed(2)}` : '-')}</td>
+                      <td>{book.stock}</td>
+                      <td>{book.isFree ? 'Yes' : 'No'}</td>
+                      <td>
+                        <div className="action-buttons">
+                          <button onClick={() => navigate(`/admin/books/edit/${book._id}`)}>
+                            <FiEdit />
+                          </button>
+                          <button onClick={() => handleDelete(book._id)} className="delete-btn">
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

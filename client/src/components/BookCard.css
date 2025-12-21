@@ -181,6 +181,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
 }
 
 .preface-header {
@@ -221,7 +222,10 @@
 
 .preface-body {
   font-family: 'Quicksand', 'Inter', sans-serif;
-  flex: 1;
+  flex: 0 0 auto;
+  margin-top: auto;
+  width: 100%;
+  text-align: left;
   color: #FFC107;
   line-height: 1.6;
   font-size: 13px;

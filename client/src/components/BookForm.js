@@ -170,11 +170,17 @@ const BookForm = () => {
     try {
       const data = {
         ...formData,
-        price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         publishedYear: formData.publishedYear ? parseInt(formData.publishedYear) : undefined,
         isFree: formData.isFree || false,
       };
+
+      if (String(formData.price).trim() !== '') {
+        const parsedPrice = parseFloat(formData.price);
+        data.price = isNaN(parsedPrice) ? undefined : parsedPrice;
+      } else {
+        data.price = undefined;
+      }
 
       if (isEditMode) {
         await bookService.updateBook(id, data);
@@ -295,14 +301,13 @@ const BookForm = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="price">Price ($) *</label>
+              <label htmlFor="price">Price ($)</label>
               <input
                 type="number"
                 id="price"
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
-                required
                 min="0"
                 step="0.01"
                 placeholder="0.00"

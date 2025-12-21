@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Header from '../components/Header';
@@ -11,6 +11,26 @@ import './Cart.css';
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useCart();
   const navigate = useNavigate();
+  const [shipping, setShipping] = useState({
+    fullName: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const isShippingValid = () => {
+    return (
+      shipping.fullName.trim() &&
+      shipping.address.trim() &&
+      shipping.city.trim() &&
+      shipping.state.trim() &&
+      shipping.zipCode.trim() &&
+      shipping.country.trim()
+    );
+  };
 
   const handleCheckout = async () => {
     if (cart.length === 0) {
@@ -19,19 +39,17 @@ const Cart = () => {
     }
 
     try {
+      if (!isShippingValid()) {
+        toast.error('Please fill in your shipping address');
+        return;
+      }
+      setSubmitting(true);
       const orderData = {
         items: cart.map(item => ({
           bookId: item._id,
           quantity: item.quantity,
         })),
-        shippingAddress: {
-          fullName: 'User Name',
-          address: '123 Main St',
-          city: 'City',
-          state: 'State',
-          zipCode: '12345',
-          country: 'Country',
-        },
+        shippingAddress: { ...shipping },
         paymentMethod: 'Card',
       };
 
@@ -41,6 +59,8 @@ const Cart = () => {
       navigate('/orders');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to place order');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -81,7 +101,9 @@ const Cart = () => {
                 <div className="cart-item-info">
                   <h3>{item.title}</h3>
                   <p>by {item.author}</p>
-                  <span className="cart-item-price">${item.price.toFixed(2)}</span>
+                  <span className="cart-item-price">
+                    {item.isFree || item.price == null ? 'Free' : `$${Number(item.price).toFixed(2)}`}
+                  </span>
                 </div>
                 <div className="cart-item-controls">
                   <button onClick={() => updateQuantity(item._id, item.quantity - 1)}>
@@ -93,7 +115,7 @@ const Cart = () => {
                   </button>
                 </div>
                 <div className="cart-item-total">
-                  ${(item.price * item.quantity).toFixed(2)}
+                  ${((Number(item.price) || 0) * item.quantity).toFixed(2)}
                 </div>
                 <button
                   className="remove-btn"
@@ -106,6 +128,53 @@ const Cart = () => {
           </div>
           <div className="cart-summary">
             <h2>Order Summary</h2>
+            <div className="shipping-form">
+              <h3>Shipping Address</h3>
+              <div className="form-grid">
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={shipping.fullName}
+                  onChange={(e) => setShipping({ ...shipping, fullName: e.target.value })}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Address"
+                  value={shipping.address}
+                  onChange={(e) => setShipping({ ...shipping, address: e.target.value })}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={shipping.city}
+                  onChange={(e) => setShipping({ ...shipping, city: e.target.value })}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="State"
+                  value={shipping.state}
+                  onChange={(e) => setShipping({ ...shipping, state: e.target.value })}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="ZIP Code"
+                  value={shipping.zipCode}
+                  onChange={(e) => setShipping({ ...shipping, zipCode: e.target.value })}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Country"
+                  value={shipping.country}
+                  onChange={(e) => setShipping({ ...shipping, country: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
             <div className="summary-row">
               <span>Subtotal</span>
               <span>${getTotalPrice().toFixed(2)}</span>
@@ -118,7 +187,7 @@ const Cart = () => {
               <span>Total</span>
               <span>${getTotalPrice().toFixed(2)}</span>
             </div>
-            <button className="checkout-btn" onClick={handleCheckout}>
+            <button className="checkout-btn" onClick={handleCheckout} disabled={submitting}>
               Proceed to Checkout
             </button>
           </div>

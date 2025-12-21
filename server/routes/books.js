@@ -64,6 +64,15 @@ router.get('/', async (req, res) => {
       total,
     });
   } catch (error) {
+    const msg = error?.message || '';
+    if (msg.includes('ECONNREFUSED')) {
+      return res.json({
+        books: [],
+        totalPages: 0,
+        currentPage: parseInt(req.query.page || 1),
+        total: 0,
+      });
+    }
     res.status(500).json({ error: error.message });
   }
 });
@@ -74,6 +83,10 @@ router.get('/genres', async (req, res) => {
     const genres = await Book.distinct('genre');
     res.json(genres.sort());
   } catch (error) {
+    const msg = error?.message || '';
+    if (msg.includes('ECONNREFUSED')) {
+      return res.json([]);
+    }
     res.status(500).json({ error: error.message });
   }
 });

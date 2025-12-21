@@ -49,6 +49,7 @@ const AdminOrders = () => {
                   <th>Customer</th>
                   <th>Items</th>
                   <th>Total</th>
+                  <th>Address</th>
                   <th>Status</th>
                   <th>Date</th>
                   <th>Actions</th>
@@ -61,6 +62,20 @@ const AdminOrders = () => {
                     <td>{order.user?.username || 'N/A'}</td>
                     <td>{order.items.length} items</td>
                     <td>${order.totalAmount.toFixed(2)}</td>
+                    <td>
+                      {order.shippingAddress ? (
+                        <>
+                          <div>{order.shippingAddress.fullName}</div>
+                          <div>{order.shippingAddress.address}</div>
+                          <div>
+                            {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
+                          </div>
+                          <div>{order.shippingAddress.country}</div>
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
                     <td>
                       <select
                         value={order.status}
