@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import './Login.css';
@@ -14,6 +15,7 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const { login, register, user, loading: authLoading } = useAuth();
+  const { darkMode } = useTheme();
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -46,6 +48,13 @@ const Login = () => {
           navigate('/');
         }
       } else {
+        const pwd = formData.password || '';
+        const isValid = /^(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}$/.test(pwd);
+        if (!isValid) {
+          toast.error('Password must be 8+ chars, include a number and a special character');
+          setLoading(false);
+          return;
+        }
         const response = await register(formData.username, formData.email, formData.password);
         toast.success('Registration successful!');
         navigate('/');
@@ -57,8 +66,13 @@ const Login = () => {
     }
   };
 
+  const pwd = formData.password || '';
+  const validLen = pwd.length >= 8;
+  const hasNum = /[0-9]/.test(pwd);
+  const hasSpecial = /[^A-Za-z0-9]/.test(pwd);
+
   return (
-    <div className="login-container">
+    <div className={`login-container ${darkMode ? 'dark' : ''}`}>
       <motion.div
         className="login-card"
         initial={{ opacity: 0, y: 20 }}
@@ -105,6 +119,13 @@ const Login = () => {
               required
             />
           </div>
+          {!isLogin && (
+            <div className="validation-hint">
+              <span className={`hint-item ${validLen ? 'valid' : 'invalid'}`}>8+ characters</span>
+              <span className={`hint-item ${hasNum ? 'valid' : 'invalid'}`}>Includes a number</span>
+              <span className={`hint-item ${hasSpecial ? 'valid' : 'invalid'}`}>Includes a special character</span>
+            </div>
+          )}
 
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Sign Up'}
