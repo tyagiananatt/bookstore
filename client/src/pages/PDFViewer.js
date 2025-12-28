@@ -34,6 +34,218 @@ const PDFViewer = () => {
   const [pageInput, setPageInput] = useState(1);
   const sessionStartRef = useRef(Date.now());
   const pagesVisitedRef = useRef(new Set());
+  const numPagesRef = useRef(null);
+
+  useEffect(() => {
+    numPagesRef.current = numPages;
+  }, [numPages]);
+
+  // --- Gesture Control State ---
+  // --- Gesture Control State ---
+  const [showGestureSidebar, setShowGestureSidebar] = useState(false);
+  const [gestureMode, setGestureMode] = useState('none'); // 'none', 'hand', 'eyes'
+  const videoRef = useRef(null);
+  const [blinkCount, setBlinkCount] = useState(0);
+  const [gestureStatus, setGestureStatus] = useState('SYSTEM READY');
+  const [gestureHint, setGestureHint] = useState('Select a mode to begin.');
+  const resetTimerRef = useRef(null);
+  const handsRef = useRef(null);
+  const faceMeshRef = useRef(null);
+  const cameraRef = useRef(null);
+  const lastHandActionRef = useRef(0);
+  const isEyeClosedRef = useRef(false);
+  const eyeBarRef = useRef(null);
+
+  // --- Gesture Logic ---
+  const gestureModeRef = useRef('none');
+
+  // --- Gesture Logic ---
+  const flashStatus = (msg, color) => {
+    setGestureStatus(msg);
+    setTimeout(() => {
+      setGestureStatus(gestureModeRef.current === 'hand' ? 'HAND MODE ACTIVE' : (gestureModeRef.current === 'eyes' ? 'EYE MODE ACTIVE' : 'SYSTEM READY'));
+    }, 1000);
+  };
+
+  const toggleGestureSidebar = () => {
+    if (showGestureSidebar) {
+      // Closing: Stop everything
+      setShowGestureSidebar(false);
+      setGestureMode('none');
+      gestureModeRef.current = 'none';
+      if (cameraRef.current) {
+        // Try to stop camera if method exists to save resources
+        try { cameraRef.current.stop(); } catch (e) { }
+        cameraRef.current = null;
+      }
+    } else {
+      // Opening: Default to none, let user pick
+      setShowGestureSidebar(true);
+      setGestureMode('none');
+      gestureModeRef.current = 'none';
+    }
+  };
+
+  const toggleMode = async (mode) => {
+    const newMode = (gestureMode === mode) ? 'none' : mode;
+    setGestureMode(newMode);
+    gestureModeRef.current = newMode;
+
+    if (newMode === 'hand') {
+      setGestureHint(<span>☝️ <b>1 Finger:</b> Previous<br />✌️ <b>2 Fingers:</b> Next</span>);
+      setGestureStatus("HAND MODE ACTIVE");
+    } else if (newMode === 'eyes') {
+      setGestureHint(<span>😉 <b>2 Blinks:</b> Previous<br />👁️ <b>3 Blinks:</b> Next</span>);
+      setGestureStatus("EYE MODE ACTIVE");
+    } else {
+      setGestureHint("Select a mode to begin.");
+      setGestureStatus("SYSTEM READY");
+    }
+  };
+
+  // Handle Blink Logic
+  const handleBlink = () => {
+    setBlinkCount(prev => {
+      const newCount = prev + 1;
+
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+
+      resetTimerRef.current = setTimeout(() => {
+        if (newCount === 3) {
+          goToNextPage();
+          flashStatus("BLINK: NEXT", "#00f3ff");
+        } else if (newCount === 2) {
+          goToPrevPage();
+          flashStatus("BLINK: PREV", "#ff0055");
+        }
+        setBlinkCount(0);
+      }, 1200);
+
+      return newCount;
+    });
+  };
+
+  // Initialize MediaPipe Models once on mount
+  useEffect(() => {
+    const loadModels = async () => {
+      // Wait for window globals to be available (simple retry logic)
+      let retries = 0;
+      const checkGlobals = setInterval(() => {
+        if (window.Hands && window.FaceMesh && window.Camera) {
+          clearInterval(checkGlobals);
+          initModels();
+        } else {
+          retries++;
+          if (retries > 50) { // 5 seconds timeout
+            clearInterval(checkGlobals);
+            console.error("MediaPipe libraries failed to load.");
+            setGestureStatus("ERROR: LIBS NOT LOADED");
+          }
+        }
+      }, 100);
+    };
+
+    const initModels = () => {
+      try {
+        // Initialize MediaPipe Hands
+        if (window.Hands && !handsRef.current) {
+          const hands = new window.Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+          hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7 });
+          hands.onResults(results => {
+            if (gestureModeRef.current !== 'hand' || !results.multiHandLandmarks[0]) return;
+            const landmarks = results.multiHandLandmarks[0];
+            const isIndexUp = landmarks[8].y < landmarks[6].y;
+            const isMiddleUp = landmarks[12].y < landmarks[10].y;
+            const isRingDown = landmarks[16].y > landmarks[14].y;
+
+            const now = Date.now();
+            if (now - lastHandActionRef.current > 1500) {
+              if (isIndexUp && isMiddleUp && isRingDown) {
+                goToNextPage();
+                lastHandActionRef.current = now;
+                flashStatus("NEXT PAGE", "#00ff88");
+              } else if (isIndexUp && !isMiddleUp) {
+                goToPrevPage();
+                lastHandActionRef.current = now;
+                flashStatus("PREV PAGE", "#ff4444");
+              }
+            }
+          });
+          handsRef.current = hands;
+        }
+
+        // Initialize MediaPipe FaceMesh
+        if (window.FaceMesh && !faceMeshRef.current) {
+          const faceMesh = new window.FaceMesh({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}` });
+          faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5 });
+          faceMesh.onResults(results => {
+            if (gestureModeRef.current !== 'eyes' || !results.multiFaceLandmarks || !results.multiFaceLandmarks[0]) {
+              if (eyeBarRef.current) eyeBarRef.current.style.width = "0%";
+              return;
+            }
+            const landmarks = results.multiFaceLandmarks[0];
+            const getEAR = (u, l) => Math.abs(u.y - l.y) * 1000;
+            const avgEAR = (getEAR(landmarks[159], landmarks[145]) + getEAR(landmarks[386], landmarks[374])) / 2;
+
+            if (eyeBarRef.current) eyeBarRef.current.style.width = Math.max(0, Math.min(100, (20 - avgEAR) * 5)) + "%";
+
+            if (avgEAR < 12) {
+              if (!isEyeClosedRef.current) {
+                isEyeClosedRef.current = true;
+                handleBlink();
+              }
+            } else if (avgEAR > 15) {
+              isEyeClosedRef.current = false;
+            }
+          });
+          faceMeshRef.current = faceMesh;
+        }
+      } catch (err) {
+        console.error("Error init MediaPipe:", err);
+      }
+    };
+
+    loadModels();
+  }, []); // Run once on mount
+
+  // Camera Logic - Uses one single camera instance
+  useEffect(() => {
+    let animationFrameId;
+
+    const startCamera = async () => {
+      if (!videoRef.current || !window.Camera) return;
+
+      // If camera already exists, just ensure it's running? 
+      // With CameraUtils, start() kicks off the loop. 
+      // We will create it once.
+      if (!cameraRef.current) {
+        const camera = new window.Camera(videoRef.current, {
+          onFrame: async () => {
+            const mode = gestureModeRef.current;
+            if (mode === 'hand' && handsRef.current) {
+              await handsRef.current.send({ image: videoRef.current });
+            } else if (mode === 'eyes' && faceMeshRef.current) {
+              await faceMeshRef.current.send({ image: videoRef.current });
+            }
+          },
+          width: 320, height: 240
+        });
+        await camera.start();
+        cameraRef.current = camera;
+      }
+    };
+
+    if (gestureMode !== 'none') {
+      // Wait a bit for video element to be ref'd
+      setTimeout(startCamera, 100);
+    }
+
+    return () => {
+      // We don't stop the camera here to avoid overhead, 
+      // or we could if we want to save battery.
+      // For now, let's keep it simple. If user leaves page, component unmounts -> cleanup.
+    };
+  }, [gestureMode]);
 
   useEffect(() => {
     fetchBook();
@@ -84,7 +296,8 @@ const PDFViewer = () => {
   };
 
   const goToNextPage = () => {
-    setPageNumber(prev => Math.min(numPages, prev + 1));
+    const max = numPagesRef.current || 1;
+    setPageNumber(prev => Math.min(max, prev + 1));
   };
 
   const recomputeBaseWidth = () => {
@@ -94,7 +307,7 @@ const PDFViewer = () => {
       const containerWidth = el.clientWidth || window.innerWidth;
       baseWidthRef.current = Math.min(Math.max(300, containerWidth - 32), 900);
       setPageWidth(Math.round(baseWidthRef.current * zoom));
-    } catch {}
+    } catch { }
   };
 
   useEffect(() => {
@@ -430,28 +643,71 @@ const PDFViewer = () => {
             <button className="toolbar-btn" onClick={summarizeWholeBook}>
               <FiBook /> Summarize Book
             </button>
+            <div className="toolbar-separator" style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.2)', margin: '0 5px' }}></div>
+            <button className={`toolbar-btn ${showGestureSidebar ? 'active' : ''}`} onClick={toggleGestureSidebar} title="Toggle Gesture Control">
+              ✋ Gestures
+            </button>
           </div>
         </div>
 
-        <div className="pdf-content" ref={contentRef}>
-          <Document
-            file={book.pdfUrl}
-            onLoadSuccess={onDocumentLoadSuccess}
-            onLoadError={onDocumentLoadError}
-            loading={
-              <div className="pdf-loading">
-                <div className="spinner"></div>
-                <p>Loading PDF...</p>
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden', gap: '1rem' }}>
+          <div className="pdf-content" ref={contentRef} style={{ flex: 1 }}>
+            <Document
+              file={book.pdfUrl}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              loading={
+                <div className="pdf-loading">
+                  <div className="spinner"></div>
+                  <p>Loading PDF...</p>
+                </div>
+              }
+            >
+              <Page
+                pageNumber={pageNumber}
+                width={pageWidth || undefined}
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+              />
+            </Document>
+          </div>
+
+          {showGestureSidebar && (
+            <aside className="gesture-sidebar">
+              <div className="control-group">
+                <span className="control-label">Live Feed</span>
+                <div id="video-container">
+                  <video id="gesture-video" ref={videoRef} playsInline autoPlay muted></video>
+                  {gestureMode === 'eyes' && (
+                    <div id="blink-counter-overlay" style={{ display: 'block' }}>{blinkCount}</div>
+                  )}
+                  <div className="hud-overlay">
+                    {gestureMode === 'eyes' && (
+                      <>
+                        <div style={{ fontSize: '10px', opacity: 0.8 }}>EYE CLOSURE</div>
+                        <div className="bar-bg"><div id="eye-bar" ref={eyeBarRef}></div></div>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
-            }
-          >
-            <Page
-              pageNumber={pageNumber}
-              width={pageWidth || undefined}
-              renderTextLayer={false}
-              renderAnnotationLayer={false}
-            />
-          </Document>
+
+              <div className="control-group">
+                <span className="control-label">Control Mode</span>
+                <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                  <button className={`gesture-btn ${gestureMode === 'hand' ? 'active' : ''}`} onClick={() => toggleMode('hand')}>✋ HAND GESTURE</button>
+                  <button className={`gesture-btn ${gestureMode === 'eyes' ? 'active' : ''}`} onClick={() => toggleMode('eyes')}>👁️ EYE BLINK</button>
+                </div>
+              </div>
+
+              <div className="control-group">
+                <span className="control-label">Instructions</span>
+                <div style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.6 }}>{gestureHint}</div>
+              </div>
+
+              <div className="gesture-status">{gestureStatus}</div>
+            </aside>
+          )}
         </div>
 
         {(summaryLoading || summary) && (

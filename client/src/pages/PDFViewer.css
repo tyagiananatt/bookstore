@@ -223,3 +223,128 @@
     font-size: 1rem;
     color: var(--text-secondary);
 }
+
+/* Gesture Control Sidebar */
+.gesture-sidebar {
+    width: 320px;
+    background: rgba(26, 27, 35, 0.95);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    backdrop-filter: blur(10px);
+    color: white;
+    overflow-y: auto;
+}
+
+.control-group {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+}
+
+.control-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 15px;
+    display: block;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+#video-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background: black;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #333;
+}
+
+#gesture-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+#blink-counter-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 243, 255, 0.2);
+    border: 1px solid #00f3ff;
+    color: #00f3ff;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 0 0 5px #00f3ff;
+}
+
+.hud-overlay {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    pointer-events: none;
+}
+
+.bar-bg {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+#eye-bar {
+    width: 0%;
+    height: 100%;
+    background: #00f3ff;
+    transition: width 0.1s;
+}
+
+.gesture-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background: #1a1b23;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.gesture-btn:hover {
+    background: #252630;
+}
+
+.gesture-btn.active {
+    border-color: #00f3ff;
+    background: rgba(0, 243, 255, 0.1);
+    color: #00f3ff;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+}
+
+.gesture-status {
+    font-size: 12px;
+    padding: 10px;
+    text-align: center;
+    color: #00f3ff;
+    font-family: monospace;
+    font-weight: bold;
+    min-height: 1.5em;
+}

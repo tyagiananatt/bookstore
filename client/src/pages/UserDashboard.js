@@ -96,8 +96,8 @@ const UserDashboard = () => {
                 </motion.div>
                 <div className="hero-image">
                     <motion.img
-                        src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNXI5a2oyZTVhOTFqemI3ajNmMmd6ejgxcmN5ZWN5NXJsOHV1ZzlwOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AAaXljLcIX2EH1lyb2/giphy.gif"
-                        //src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmowMWJkcWd5ano5NXM5ZDRmMDl1ZXg5dnltZmZ3MnBtNDFvN3EzeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AqOoXdyfr2M1GzLtFi/giphy.gif"
+                        // src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNXI5a2oyZTVhOTFqemI3ajNmMmd6ejgxcmN5ZWN5NXJsOHV1ZzlwOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AAaXljLcIX2EH1lyb2/giphy.gif"
+                        src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmowMWJkcWd5ano5NXM5ZDRmMDl1ZXg5dnltZmZ3MnBtNDFvN3EzeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AqOoXdyfr2M1GzLtFi/giphy.gif"
                         alt="Books"
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
